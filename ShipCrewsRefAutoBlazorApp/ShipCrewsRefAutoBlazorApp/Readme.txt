@@ -7,3 +7,7 @@ For auto client code: https://www.code4it.dev/blog/openapi-code-generation-vs201
 
 	the code can be viewed by double clicking Connected Services which will open a tab
 	and then ... -> View generated code
+
+2) Create a shipcrews service for injection (as in C:\Users\rapen\Documents\Learning\MSTraining\blazor-samples\8.0\BlazorWebAppCallWebApi_Weather)
+
+3) Add the People page.

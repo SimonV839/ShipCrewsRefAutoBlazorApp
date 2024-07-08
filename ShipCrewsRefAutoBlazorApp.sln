@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShipCrewsRefAutoBlazorApp.C
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7C008990-11EC-4FA5-96DB-E67A49C4E540}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject", "TestProject\TestProject.csproj", "{7578D82F-EC6E-42A2-A1A2-67EB198655C5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +25,10 @@ Global
 		{F18CF5FB-D71D-4D92-B168-0F8C2BE19346}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F18CF5FB-D71D-4D92-B168-0F8C2BE19346}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F18CF5FB-D71D-4D92-B168-0F8C2BE19346}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7578D82F-EC6E-42A2-A1A2-67EB198655C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7578D82F-EC6E-42A2-A1A2-67EB198655C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7578D82F-EC6E-42A2-A1A2-67EB198655C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7578D82F-EC6E-42A2-A1A2-67EB198655C5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

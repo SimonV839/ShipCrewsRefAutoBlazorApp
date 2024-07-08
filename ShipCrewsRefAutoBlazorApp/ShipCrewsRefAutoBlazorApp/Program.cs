@@ -1,5 +1,7 @@
+using ShipCrewsRefAutoBlazorApp;
 using ShipCrewsRefAutoBlazorApp.Client.Pages;
 using ShipCrewsRefAutoBlazorApp.Components;
+using ShipCrewsRefAutoBlazorApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +9,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
+
+// Simon: client injected into ship crews client
+builder.Services.AddSingleton(new HttpClient());
+builder.Services.AddSingleton<IShipCrewsService, ShipCrewsService>();
 
 var app = builder.Build();
 
