@@ -4,7 +4,7 @@ namespace ShipCrewsRefAutoBlazorApp
 {
     /// <summary>
     /// Service Response
-    /// Simon: Because I don't know better yet
+    /// Simon: Because I don't know better yet.
     /// </summary>
     public class ServiceResponse<T>
     {
@@ -13,37 +13,16 @@ namespace ShipCrewsRefAutoBlazorApp
         /// </summary>
         public bool IsSuccess
         {
-            get
-            {
-                Contract.Requires(IsValid, "The combination of allowable values is incorrect.");
-                return simpleResponse.IsSuccess;
-            }
-            set
-            {
-                Contract.Requires(IsValid, "The combination of allowable values is incorrect.");
-                Contract.Ensures(IsValid, "The combination of allowable values is incorrect.");
-                if (value)
-                {
-                    simpleResponse.IsSuccess = true;
-                }
-                else
-                {
-                    simpleResponse.IsSuccess = false;
-                    item = default;
-                }
-            }
+            get => simpleResponse.IsSuccess;
         }
 
         /// <summary>
         /// The text associated with a failure.
+        /// 
         /// </summary>
         public string? Error 
         { 
-            get
-            {
-                Contract.Requires(IsValid, "The combination of allowable values is incorrect.");
-                return simpleResponse.Error;
-            }
+            get => simpleResponse.Error;
             set
             {
                 Contract.Requires(IsValid, "The combination of allowable values is incorrect.");
@@ -66,8 +45,19 @@ namespace ShipCrewsRefAutoBlazorApp
             {
                 Contract.Requires(IsValid, "The combination of allowable values is incorrect.");
                 Contract.Ensures(IsValid, "The combination of allowable values is incorrect.");
+
                 item = value;
-                System.Diagnostics.Debug.Assert(IsValid, "The combination of allowable values is incorrect.");
+                if (value == null)
+                {
+                    if (Error == null)
+                    {
+                        simpleResponse.Error = string.Empty;
+                    }
+                }
+                else
+                {
+                    simpleResponse.Error = null;
+                }
             }
         }
 
@@ -81,7 +71,7 @@ namespace ShipCrewsRefAutoBlazorApp
             }
         }
 
-        SimpleResponse simpleResponse = new SimpleResponse();
+        private SimpleResponse simpleResponse = new SimpleResponse();
         private T? item;
     }
 }

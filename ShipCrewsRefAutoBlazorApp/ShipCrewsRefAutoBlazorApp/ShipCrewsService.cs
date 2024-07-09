@@ -15,31 +15,31 @@ namespace ShipCrewsRefAutoBlazorApp
             client = new ShipCrewClientAuto("https://localhost:7075/", httpClient);
         }
 
-        public Task<SimpleResponse> CreatePerson(Person body)
+        public Task<SimpleResponse> CreatePerson(PersonHacked body)
         {
             throw new NotImplementedException();
         }
 
-        public Task<SimpleResponse> DeletePerson(Person body)
+        public Task<SimpleResponse> DeletePerson(PersonHacked body)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<ServiceResponse<ICollection<Person>>> GetAllPeopleAsync()
+        public async Task<ServiceResponse<ICollection<PersonHacked>>> GetAllPeopleAsync()
         {
             try
             {
                 var res = await client.PeopleAllAsync();
-                return new ServiceResponse<ICollection<Person>>() { Item = res };
+                return new ServiceResponse<ICollection<PersonHacked>>() { Item = res };
             }
             catch(Exception excep)
             {
                 logger.LogError(excep,@"{GetAllPeopleAsync}", nameof(GetAllPeopleAsync));
-                return new ServiceResponse<ICollection<Person>>() { IsSuccess = false, Error = excep.Message };
+                return new ServiceResponse<ICollection<PersonHacked>>() { Error = excep.Message };
             }
         }
 
-        public Task<SimpleResponse> UpdatePerson(Person body)
+        public Task<SimpleResponse> UpdatePerson(PersonHacked body)
         {
             throw new NotImplementedException();
         }

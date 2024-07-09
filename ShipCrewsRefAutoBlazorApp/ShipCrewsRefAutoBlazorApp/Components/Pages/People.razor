@@ -3,7 +3,38 @@
 @inject IShipCrewsService client
 @inject ILogger<People> Logger
 
-<h3>People</h3>
+<PageTitle>People</PageTitle>
+
+<h1>People</h1>
+<p>This component demonstrates retrevial of data from and OpenAPI service .</p>
+@if (people == null)
+{
+    <p><em>@message</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>PersonId</th>
+                <th>FirstName</th>
+                <th>LastName</th>
+                <th>RoleId</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var pers in people)
+            {
+                <tr>
+                    <td>@pers.PersonId</td>
+                    <td>@pers.FirstName</td>
+                    <td>@pers.LastName</td>
+                    <td>@pers.RoleId</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
 @code {
     /*
@@ -11,13 +42,25 @@
     private ILogger<People>? Logger { get; set; }
     */
 
-    private ICollection<Person> people = new List<Person>();
+    private ICollection<PersonHacked>? people;
+    private string message = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
         Logger.LogInformation(@"{OnInitializedAsync} started", nameof(OnInitializedAsync));
 
+        message = "Loading ...";
         var res = await client.GetAllPeopleAsync();
+
+        if (res.IsSuccess)
+        {
+            people = res.Item;
+            System.Diagnostics.Debug.Assert(people != null, "Coding error. IsSuccess means the item value must have been retrieved.");
+        }
+        else
+        {
+            message = res.Error ?? "No specific error text!";
+        }
 
         Logger.LogInformation(@"{OnInitializedAsync} finished", nameof(OnInitializedAsync));
     }

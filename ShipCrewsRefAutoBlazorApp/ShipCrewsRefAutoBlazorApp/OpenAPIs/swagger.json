@@ -164,7 +164,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Crew"
+                    "$ref": "#/components/schemas/CrewHacked"
                   }
                 }
               },
@@ -172,7 +172,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Crew"
+                    "$ref": "#/components/schemas/CrewHacked"
                   }
                 }
               },
@@ -180,7 +180,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Crew"
+                    "$ref": "#/components/schemas/CrewHacked"
                   }
                 }
               }
@@ -196,17 +196,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Crew"
+                "$ref": "#/components/schemas/CrewHacked"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/Crew"
+                "$ref": "#/components/schemas/CrewHacked"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/Crew"
+                "$ref": "#/components/schemas/CrewHacked"
               }
             }
           }
@@ -217,17 +217,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/Crew"
+                  "$ref": "#/components/schemas/CrewHacked"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Crew"
+                  "$ref": "#/components/schemas/CrewHacked"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Crew"
+                  "$ref": "#/components/schemas/CrewHacked"
                 }
               }
             }
@@ -252,17 +252,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Crew"
+                "$ref": "#/components/schemas/CrewHacked"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/Crew"
+                "$ref": "#/components/schemas/CrewHacked"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/Crew"
+                "$ref": "#/components/schemas/CrewHacked"
               }
             }
           }
@@ -273,17 +273,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/Crew"
+                  "$ref": "#/components/schemas/CrewHacked"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Crew"
+                  "$ref": "#/components/schemas/CrewHacked"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Crew"
+                  "$ref": "#/components/schemas/CrewHacked"
                 }
               }
             }
@@ -313,17 +313,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/Crew"
+                  "$ref": "#/components/schemas/CrewHacked"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Crew"
+                  "$ref": "#/components/schemas/CrewHacked"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Crew"
+                  "$ref": "#/components/schemas/CrewHacked"
                 }
               }
             }
@@ -351,17 +351,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/Crew"
+                  "$ref": "#/components/schemas/CrewHacked"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Crew"
+                  "$ref": "#/components/schemas/CrewHacked"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Crew"
+                  "$ref": "#/components/schemas/CrewHacked"
                 }
               }
             }
@@ -382,7 +382,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Person"
+                    "$ref": "#/components/schemas/PersonHacked"
                   }
                 }
               },
@@ -390,7 +390,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Person"
+                    "$ref": "#/components/schemas/PersonHacked"
                   }
                 }
               },
@@ -398,7 +398,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Person"
+                    "$ref": "#/components/schemas/PersonHacked"
                   }
                 }
               }
@@ -414,17 +414,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Person"
+                "$ref": "#/components/schemas/PersonHacked"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/Person"
+                "$ref": "#/components/schemas/PersonHacked"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/Person"
+                "$ref": "#/components/schemas/PersonHacked"
               }
             }
           }
@@ -435,17 +435,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/Person"
+                  "$ref": "#/components/schemas/PersonHacked"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Person"
+                  "$ref": "#/components/schemas/PersonHacked"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Person"
+                  "$ref": "#/components/schemas/PersonHacked"
                 }
               }
             }
@@ -470,17 +470,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Person"
+                "$ref": "#/components/schemas/PersonHacked"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/Person"
+                "$ref": "#/components/schemas/PersonHacked"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/Person"
+                "$ref": "#/components/schemas/PersonHacked"
               }
             }
           }
@@ -491,17 +491,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/Person"
+                  "$ref": "#/components/schemas/PersonHacked"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Person"
+                  "$ref": "#/components/schemas/PersonHacked"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Person"
+                  "$ref": "#/components/schemas/PersonHacked"
                 }
               }
             }
@@ -531,17 +531,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/Person"
+                  "$ref": "#/components/schemas/PersonHacked"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Person"
+                  "$ref": "#/components/schemas/PersonHacked"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Person"
+                  "$ref": "#/components/schemas/PersonHacked"
                 }
               }
             }
@@ -600,7 +600,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Role"
+                    "$ref": "#/components/schemas/RoleHacked"
                   }
                 }
               },
@@ -608,7 +608,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Role"
+                    "$ref": "#/components/schemas/RoleHacked"
                   }
                 }
               },
@@ -616,7 +616,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Role"
+                    "$ref": "#/components/schemas/RoleHacked"
                   }
                 }
               }
@@ -647,17 +647,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/Role"
+                  "$ref": "#/components/schemas/RoleHacked"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Role"
+                  "$ref": "#/components/schemas/RoleHacked"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Role"
+                  "$ref": "#/components/schemas/RoleHacked"
                 }
               }
             }
@@ -750,6 +750,20 @@
           },
           "person": {
             "$ref": "#/components/schemas/Person"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CrewHacked": {
+        "type": "object",
+        "properties": {
+          "crewId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -849,6 +863,29 @@
         },
         "additionalProperties": false
       },
+      "PersonHacked": {
+        "type": "object",
+        "properties": {
+          "personId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "firstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "roleId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "Role": {
         "type": "object",
         "properties": {
@@ -865,6 +902,20 @@
             "items": {
               "$ref": "#/components/schemas/Person"
             },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RoleHacked": {
+        "type": "object",
+        "properties": {
+          "roleId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
             "nullable": true
           }
         },

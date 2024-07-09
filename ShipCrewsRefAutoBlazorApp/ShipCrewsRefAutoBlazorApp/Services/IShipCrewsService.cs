@@ -7,9 +7,9 @@
     /// </summary>
     public interface IShipCrewsService
     {
-        Task<ServiceResponse<ICollection<Person>>> GetAllPeopleAsync();
-        Task<SimpleResponse> CreatePerson(Person body);
-        Task<SimpleResponse> UpdatePerson(Person body);
-        Task<SimpleResponse> DeletePerson(Person body);
+        Task<ServiceResponse<ICollection<PersonHacked>>> GetAllPeopleAsync();
+        Task<SimpleResponse> CreatePerson(PersonHacked body);
+        Task<SimpleResponse> UpdatePerson(PersonHacked body);
+        Task<SimpleResponse> DeletePerson(PersonHacked body);
     }
 }
