@@ -1,0 +1,24 @@
+﻿@page "/people"
+@using ShipCrewsRefAutoBlazorApp.Services
+@inject IShipCrewsService client
+@inject ILogger<People> Logger
+
+<h3>People</h3>
+
+@code {
+    /*
+    [Inject]
+    private ILogger<People>? Logger { get; set; }
+    */
+
+    private ICollection<Person> people = new List<Person>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Logger.LogInformation(@"{OnInitializedAsync} started", nameof(OnInitializedAsync));
+
+        var res = await client.GetAllPeopleAsync();
+
+        Logger.LogInformation(@"{OnInitializedAsync} finished", nameof(OnInitializedAsync));
+    }
+}

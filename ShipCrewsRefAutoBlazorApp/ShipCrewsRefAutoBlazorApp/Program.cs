@@ -1,9 +1,21 @@
+using LoggingHelpers;
+using Serilog;
 using ShipCrewsRefAutoBlazorApp;
 using ShipCrewsRefAutoBlazorApp.Client.Pages;
 using ShipCrewsRefAutoBlazorApp.Components;
 using ShipCrewsRefAutoBlazorApp.Services;
 
+Log.Logger = new LoggerConfiguration()
+    .ConfigureBasic()
+    .ConfigureMinLoggingLevel()
+    .ConfigureWriteToDefaultFile()
+    .ConfigureWriteToConsole()
+    .CreateLogger();
+Log.Logger.Information("Starting");
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

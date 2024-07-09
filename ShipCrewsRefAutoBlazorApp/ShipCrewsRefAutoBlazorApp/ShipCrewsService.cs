@@ -4,11 +4,13 @@ namespace ShipCrewsRefAutoBlazorApp
 {
     public class ShipCrewsService : IShipCrewsService
     {
+        ILogger<ShipCrewsService> logger;
         private HttpClient httpClient;
         private ShipCrewClientAuto client;
 
-        public ShipCrewsService(HttpClient httpClient)
+        public ShipCrewsService(ILogger<ShipCrewsService> logger, HttpClient httpClient)
         {
+            this.logger = logger;
             this.httpClient = httpClient;
             client = new ShipCrewClientAuto("https://localhost:7075/", httpClient);
         }
@@ -23,9 +25,18 @@ namespace ShipCrewsRefAutoBlazorApp
             throw new NotImplementedException();
         }
 
-        public Task<ServiceResponse<ICollection<Person>>> GetAllPeopleAsync()
+        public async Task<ServiceResponse<ICollection<Person>>> GetAllPeopleAsync()
         {
-            throw new NotImplementedException();
+            try
+            {
+                var res = await client.PeopleAllAsync();
+                return new ServiceResponse<ICollection<Person>>() { Item = res };
+            }
+            catch(Exception excep)
+            {
+                logger.LogError(excep,@"{GetAllPeopleAsync}", nameof(GetAllPeopleAsync));
+                return new ServiceResponse<ICollection<Person>>() { IsSuccess = false, Error = excep.Message };
+            }
         }
 
         public Task<SimpleResponse> UpdatePerson(Person body)
