@@ -15,9 +15,18 @@ namespace ShipCrewsRefAutoBlazorApp
             client = new ShipCrewClientAuto("https://localhost:7075/", httpClient);
         }
 
-        public Task<SimpleResponse> CreatePerson(PersonHacked body)
+        public async Task<SimpleResponse> CreatePerson(PersonHacked body)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var res = await client.PeoplePOSTAsync(body);
+                return new SimpleResponse();
+            }
+            catch (Exception excep) 
+            {
+                logger.LogError(excep, @"{CreatePerson}", nameof(CreatePerson));
+                return new SimpleResponse() { Error = excep.Message };
+            }
         }
 
         public Task<SimpleResponse> DeletePerson(PersonHacked body)

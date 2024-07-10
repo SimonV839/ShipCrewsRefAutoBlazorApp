@@ -36,6 +36,13 @@ else
     </table>
 }
 
+<p>
+<button @onclick="OnOrderByLastNameClick">Order by Last Name</button>
+</p>
+<p>
+<button @onclick="OnAddPersonClick">Add Person</button>
+</p>
+
 @code {
     /*
     [Inject]
@@ -63,5 +70,15 @@ else
         }
 
         Logger.LogInformation(@"{OnInitializedAsync} finished", nameof(OnInitializedAsync));
+    }
+
+    private Task OnAddPersonClick()
+    {
+        return null;
+    }
+
+    private Task OnOrderByLastNameClick()
+    {
+        return null;
     }
 }
