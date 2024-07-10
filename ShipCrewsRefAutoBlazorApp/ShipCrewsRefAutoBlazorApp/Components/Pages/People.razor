@@ -1,12 +1,27 @@
 ﻿@page "/people"
+@page "/people/{specificPerson:int?}"
 @using ShipCrewsRefAutoBlazorApp.Services
+@inject NavigationManager NavigationManager
 @inject IShipCrewsService client
 @inject ILogger<People> Logger
+
+@code {
+    // Simon: without this, there is no interaction (button click events). If used on the client, InteractionAuto will be required
+}
+@rendermode InteractiveServer   
 
 <PageTitle>People</PageTitle>
 
 <h1>People</h1>
-<p>This component demonstrates retrevial of data from and OpenAPI service .</p>
+<p>This component demonstrates 
+    <ul>
+        <li>retrevial of data from and OpenAPI service</li>
+        <li>use of an optional parameter on this page</li>
+        <li>navigation (back to this page)</li>
+        <li>text input and button click</li>
+    </ul>
+</p>
+
 @if (people == null)
 {
     <p><em>@message</em></p>
@@ -37,17 +52,20 @@ else
 }
 
 <p>
-<button @onclick="OnOrderByLastNameClick">Order by Last Name</button>
-</p>
-<p>
-<button @onclick="OnAddPersonClick">Add Person</button>
+    <InputText @bind-Value=UserInputSpecificPerson />
+    <button @onclick="OnShowPersonTestClick">Show a Person</button>
 </p>
 
 @code {
-    /*
-    [Inject]
-    private ILogger<People>? Logger { get; set; }
-    */
+        /*
+        [Inject]
+        private ILogger<People>? Logger { get; set; }
+        */
+
+    [Parameter]
+    public int? SpecificPerson { get; set; }
+
+    private string UserInputSpecificPerson { get; set; } = string.Empty;
 
     private ICollection<PersonHacked>? people;
     private string message = string.Empty;
@@ -57,28 +75,57 @@ else
         Logger.LogInformation(@"{OnInitializedAsync} started", nameof(OnInitializedAsync));
 
         message = "Loading ...";
-        var res = await client.GetAllPeopleAsync();
 
-        if (res.IsSuccess)
+        Task<ServiceResponse<ICollection<PersonHacked>>> res;
+        if (SpecificPerson == null) { res = GetAllPeople(); }
+        else { res = GetSinglePerson(SpecificPerson.Value); }
+
+        var result = await res;
+
+        if (result.IsSuccess)
         {
-            people = res.Item;
+            people = result.Item;
             System.Diagnostics.Debug.Assert(people != null, "Coding error. IsSuccess means the item value must have been retrieved.");
         }
         else
         {
-            message = res.Error ?? "No specific error text!";
+            message = result.Error ?? "No specific error text!";
         }
 
         Logger.LogInformation(@"{OnInitializedAsync} finished", nameof(OnInitializedAsync));
     }
 
-    private Task OnAddPersonClick()
+    private async Task<ServiceResponse<ICollection<PersonHacked>>> GetAllPeople()
     {
-        return null;
+        return await client.GetAllPeopleAsync();
     }
 
-    private Task OnOrderByLastNameClick()
+    private async Task<ServiceResponse<ICollection<PersonHacked>>> GetSinglePerson(int id)
     {
-        return null;
+        var res = await client.GetPersonAsync(id);
+
+        if (res.IsSuccess)
+        {
+            System.Diagnostics.Debug.Assert(res.Item != null, "Success only when a person is returned");
+            return new ServiceResponse<ICollection<PersonHacked>>() { Item = new List<PersonHacked>() { res.Item }};
+        }
+        else
+        {
+            return new ServiceResponse<ICollection<PersonHacked>>() { Error = res.Error };
+        }
+    }
+
+    private void OnShowPersonTestClick()
+    {
+        if(!int.TryParse(UserInputSpecificPerson, out int specVal))
+        {
+            people = null;
+            message = $"{nameof(OnShowPersonTestClick)} aborted as '{UserInputSpecificPerson}' was not recognised as an integer";
+            return;
+        }
+
+        //var nav = $"{NavigationManager.BaseUri}People/1"; //  absolute
+        var nav = $"/People/{specVal}"; //  relative
+        NavigationManager.NavigateTo(nav);
     }
 }
