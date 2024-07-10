@@ -1,14 +1,21 @@
-﻿@page "/people"
-@page "/people/{specificPerson:int?}"
+﻿@page "/people/"
+@page "/people/{specificPersonId:int?}"
 @using ShipCrewsRefAutoBlazorApp.Services
+@using Microsoft.AspNetCore.WebUtilities
 @inject NavigationManager NavigationManager
 @inject IShipCrewsService client
 @inject ILogger<People> Logger
 
 @code {
     // Simon: without this, there is no interaction (button click events). If used on the client, InteractionAuto will be required
+    //@rendermode InteractiveServer
+
+    //  With this, there are no mouse clicks
+    //@rendermode InteractiveAuto
+    //@rendermode InteractiveWebAssembly
+
 }
-@rendermode InteractiveServer   
+@rendermode InteractiveServer
 
 <PageTitle>People</PageTitle>
 
@@ -16,7 +23,8 @@
 <p>This component demonstrates 
     <ul>
         <li>retrevial of data from and OpenAPI service</li>
-        <li>use of an optional parameter on this page</li>
+        <li>use of an optional parameter (@nameof(SpecificPersonId))</li>
+        <li>use of query string (@nameof(LastName)) - not working properly yet - server seems to see no change in people requested</li>
         <li>navigation (back to this page)</li>
         <li>text input and button click</li>
     </ul>
@@ -52,8 +60,12 @@ else
 }
 
 <p>
-    <InputText @bind-Value=UserInputSpecificPerson />
-    <button @onclick="OnShowPersonTestClick">Show a Person</button>
+    <InputText @bind-Value=UserInputSpecificPersonId />
+    <button @onclick="OnShowSpecificPersonClick">Show a person by ID</button>
+</p>
+<p>
+    <InputText @bind-Value=UserSpecifiedLastName />
+    <button @onclick="OnShowPeopleByLastNameClick">Show a people with last name - need more knowledge - this only seems to update on the server - rendermode</button>
 </p>
 
 @code {
@@ -63,9 +75,12 @@ else
         */
 
     [Parameter]
-    public int? SpecificPerson { get; set; }
+    public int? SpecificPersonId { get; set; }
 
-    private string UserInputSpecificPerson { get; set; } = string.Empty;
+    private string? LastName { get; set; }
+
+    private string UserInputSpecificPersonId { get; set; } = string.Empty;
+    private string UserSpecifiedLastName { get; set; } = string.Empty;
 
     private ICollection<PersonHacked>? people;
     private string message = string.Empty;
@@ -76,15 +91,27 @@ else
 
         message = "Loading ...";
 
+        SetLastNameQuery();
+
         Task<ServiceResponse<ICollection<PersonHacked>>> res;
-        if (SpecificPerson == null) { res = GetAllPeople(); }
-        else { res = GetSinglePerson(SpecificPerson.Value); }
+        if (SpecificPersonId == null) { res = GetAllPeople(); }
+        else { res = GetSinglePerson(SpecificPersonId.Value); }
 
         var result = await res;
 
         if (result.IsSuccess)
         {
-            people = result.Item;
+            System.Diagnostics.Debug.Assert(result.Item != null, "On success a value must have been set");
+
+            if (SpecificPersonId == null && !string.IsNullOrEmpty(LastName))
+            {
+                people = result.Item.Where(p => p.LastName.Equals(LastName, StringComparison.InvariantCulture)).ToList();
+            }
+            else 
+            { 
+                people = result.Item;
+            }
+
             System.Diagnostics.Debug.Assert(people != null, "Coding error. IsSuccess means the item value must have been retrieved.");
         }
         else
@@ -92,7 +119,19 @@ else
             message = result.Error ?? "No specific error text!";
         }
 
-        Logger.LogInformation(@"{OnInitializedAsync} finished", nameof(OnInitializedAsync));
+        Logger.LogInformation(@"{OnInitializedAsync} finished. Nr people:{nr}, message:'{mesage}'", nameof(OnInitializedAsync), people?.Count, message);
+    }
+
+    private void SetLastNameQuery()
+    {
+        LastName = null;
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        var keyVals = QueryHelpers.ParseQuery(uri.Query);
+        var f = nameof(LastName);
+        if (keyVals.TryGetValue(nameof(LastName), out var lastName))
+        {
+            LastName = System.Convert.ToString(lastName).Trim('"');
+        }
     }
 
     private async Task<ServiceResponse<ICollection<PersonHacked>>> GetAllPeople()
@@ -115,17 +154,35 @@ else
         }
     }
 
-    private void OnShowPersonTestClick()
+    private void OnShowSpecificPersonClick()
     {
-        if(!int.TryParse(UserInputSpecificPerson, out int specVal))
+        if(!int.TryParse(UserInputSpecificPersonId, out int specVal))
         {
             people = null;
-            message = $"{nameof(OnShowPersonTestClick)} aborted as '{UserInputSpecificPerson}' was not recognised as an integer";
+            message = $"{nameof(OnShowSpecificPersonClick)} aborted as '{UserInputSpecificPersonId}' was not recognised as an integer";
             return;
         }
 
         //var nav = $"{NavigationManager.BaseUri}People/1"; //  absolute
         var nav = $"/People/{specVal}"; //  relative
+        NavigationManager.NavigateTo(nav);
+    }
+
+    private void OnShowPeopleByLastNameClick()
+    {
+        //  Does not help
+        //StateHasChanged();
+        //message = string.Empty;
+
+        if (string.IsNullOrEmpty(UserSpecifiedLastName))
+        {
+            people = null;
+            message = $"{nameof(OnShowPeopleByLastNameClick)} aborted as '{UserSpecifiedLastName}' was not specified";
+            return;
+        }
+
+        //var nav = $"/People?{nameof(LastName)}=\"{UserSpecifiedLastName}\""; //  relative
+        var nav = $"{NavigationManager.BaseUri}People?{nameof(LastName)}=\"{UserSpecifiedLastName}\""; //  absolute
         NavigationManager.NavigateTo(nav);
     }
 }
