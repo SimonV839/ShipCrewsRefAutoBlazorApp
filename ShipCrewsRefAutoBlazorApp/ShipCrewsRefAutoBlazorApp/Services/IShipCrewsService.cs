@@ -8,6 +8,9 @@
     public interface IShipCrewsService
     {
         Task<ServiceResponse<ICollection<PersonHacked>>> GetAllPeopleAsync();
+
+        //  Added because filtering after the await seems to cause a problem with refresh
+        Task<ServiceResponse<ICollection<PersonHacked>>> GetAllPeopleWithLastNameAsync(string lastName);
         Task<ServiceResponse<PersonHacked>> GetPersonAsync(int id);
         Task<SimpleResponse> CreatePersonAsync(PersonHacked body);
         Task<SimpleResponse> UpdatePersonAsync(PersonHacked body);

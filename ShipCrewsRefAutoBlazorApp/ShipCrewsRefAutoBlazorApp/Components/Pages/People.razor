@@ -1,10 +1,12 @@
 ﻿@page "/people/"
+@page "/people*/"
 @page "/people/{specificPersonId:int?}"
 @using ShipCrewsRefAutoBlazorApp.Services
 @using Microsoft.AspNetCore.WebUtilities
 @inject NavigationManager NavigationManager
 @inject IShipCrewsService client
 @inject ILogger<People> Logger
+@inject IJSRuntime JS
 
 @code {
     // Simon: without this, there is no interaction (button click events). If used on the client, InteractionAuto will be required
@@ -64,8 +66,11 @@ else
     <button @onclick="OnShowSpecificPersonClick">Show a person by ID</button>
 </p>
 <p>
-    <InputText @bind-Value=UserSpecifiedLastName />
+    <input @ref="defaultFocus" @bind=UserSpecifiedLastName />
     <button @onclick="OnShowPeopleByLastNameClick">Show a people with last name - need more knowledge - this only seems to update on the server - rendermode</button>
+</p>
+<p>
+    <button @onclick="OnTestClearClick">Clear the table</button>
 </p>
 
 @code {
@@ -77,6 +82,7 @@ else
     [Parameter]
     public int? SpecificPersonId { get; set; }
 
+    ElementReference defaultFocus;    
     private string? LastName { get; set; }
 
     private string UserInputSpecificPersonId { get; set; } = string.Empty;
@@ -87,14 +93,22 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        Logger.LogInformation(@"{OnInitializedAsync} started", nameof(OnInitializedAsync));
+        //  note await will not be accepted here
+        //JS.InvokeVoidAsync("alert", "OnInitializedAsync called");
 
+        Logger.LogInformation(@"{OnInitializedAsync} started. LastName:{LastName}, SpecificPersonId:{SpecificPersonId}", nameof(OnInitializedAsync), LastName, SpecificPersonId);
+
+        people = null;  //  note: this does not help the failed refresh issue when filtering
         message = "Loading ...";
 
         SetLastNameQuery();
 
         Task<ServiceResponse<ICollection<PersonHacked>>> res;
-        if (SpecificPersonId == null) { res = GetAllPeople(); }
+        if (SpecificPersonId == null) 
+        {
+            if (string.IsNullOrEmpty(LastName)) { res = GetAllPeople(); }
+            else { res = GetAllWithLastNamePeople(LastName); }
+        }
         else { res = GetSinglePerson(SpecificPersonId.Value); }
 
         var result = await res;
@@ -102,15 +116,21 @@ else
         if (result.IsSuccess)
         {
             System.Diagnostics.Debug.Assert(result.Item != null, "On success a value must have been set");
+            people = result.Item;
 
+            /* this causes refresh problem
             if (SpecificPersonId == null && !string.IsNullOrEmpty(LastName))
-            {
+                {
                 people = result.Item.Where(p => p.LastName.Equals(LastName, StringComparison.InvariantCulture)).ToList();
-            }
-            else 
-            { 
+                //this.StateHasChanged();   //  this does not help with the refresh problem
+                }
+                else 
+                { 
                 people = result.Item;
             }
+            */
+
+            message = string.Empty;
 
             System.Diagnostics.Debug.Assert(people != null, "Coding error. IsSuccess means the item value must have been retrieved.");
         }
@@ -122,21 +142,47 @@ else
         Logger.LogInformation(@"{OnInitializedAsync} finished. Nr people:{nr}, message:'{mesage}'", nameof(OnInitializedAsync), people?.Count, message);
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Logger.LogInformation(@"{OnAfterRenderAsync} started. LastName:{LastName}, SpecificPersonId:{SpecificPersonId}", nameof(OnAfterRenderAsync), LastName, SpecificPersonId);
+
+        if (firstRender) { await defaultFocus.FocusAsync(); }
+    }
+
     private void SetLastNameQuery()
     {
         LastName = null;
         var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
         var keyVals = QueryHelpers.ParseQuery(uri.Query);
-        var f = nameof(LastName);
         if (keyVals.TryGetValue(nameof(LastName), out var lastName))
         {
             LastName = System.Convert.ToString(lastName).Trim('"');
         }
     }
 
+    private async Task<ServiceResponse<ICollection<PersonHacked>>> GetAllWithLastNamePeople(string lastName)
+    {
+        // this does not help with refresh problem
+        return await client.GetAllPeopleWithLastNameAsync(lastName);
+    }
+
     private async Task<ServiceResponse<ICollection<PersonHacked>>> GetAllPeople()
     {
         return await client.GetAllPeopleAsync();
+
+        /* this does not help with refresh problem
+        var res = await client.GetAllPeopleAsync();
+
+            if (res.IsSuccess)
+            {
+            System.Diagnostics.Debug.Assert(res.Item != null, "Success only when a list is returned");
+            return new ServiceResponse<ICollection<PersonHacked>>() { Item = new List<PersonHacked>(res.Item) };
+            }
+            else
+            {
+            return new ServiceResponse<ICollection<PersonHacked>>() { Error = res.Error };
+    }
+    */
     }
 
     private async Task<ServiceResponse<ICollection<PersonHacked>>> GetSinglePerson(int id)
@@ -174,6 +220,11 @@ else
         //StateHasChanged();
         //message = string.Empty;
 
+        /* these have an affect but it looks like OnInitializedAsync is not called for the client?/server? - only one is called - it routing does not take place
+        people = null;
+        message = "does this help with refresh?";
+        */
+
         if (string.IsNullOrEmpty(UserSpecifiedLastName))
         {
             people = null;
@@ -185,4 +236,11 @@ else
         var nav = $"{NavigationManager.BaseUri}People?{nameof(LastName)}=\"{UserSpecifiedLastName}\""; //  absolute
         NavigationManager.NavigateTo(nav);
     }
+
+    private void OnTestClearClick()
+    {
+        people = null;
+        message = "Grid cleared by user";
+    }
+
 }

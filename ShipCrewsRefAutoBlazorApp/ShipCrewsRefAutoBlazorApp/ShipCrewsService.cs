@@ -48,6 +48,24 @@ namespace ShipCrewsRefAutoBlazorApp
             }
         }
 
+        public async Task<ServiceResponse<ICollection<PersonHacked>>> GetAllPeopleWithLastNameAsync(string lastName)
+        {
+            try
+            {
+                /* does not help with refresh problem
+                var dummy = GetPersonAsync(0);
+                */
+
+                var res = await client.PeopleAllAsync();
+                return new ServiceResponse<ICollection<PersonHacked>>() { Item = res?.Where(p => p.LastName.Equals(lastName, StringComparison.InvariantCulture)).ToList() };
+            }
+            catch (Exception excep)
+            {
+                logger.LogError(excep, @"{GetAllPeopleAsync}", nameof(GetAllPeopleAsync));
+                return new ServiceResponse<ICollection<PersonHacked>>() { Error = excep.Message };
+            }
+        }
+
         public async Task<ServiceResponse<PersonHacked>> GetPersonAsync(int id)
         {
             try
