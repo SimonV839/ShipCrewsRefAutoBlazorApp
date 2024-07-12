@@ -1,0 +1,69 @@
+﻿@page "/newpersonasperexample"
+@using ShipCrewsRefAutoBlazorApp.Services
+@using Microsoft.AspNetCore.WebUtilities
+
+@inject IShipCrewsService client
+@inject ILogger<People> Logger
+@inject IJSRuntime JS
+
+@code {
+    // Simon: without this, events do not fire
+}
+@rendermode InteractiveServer
+
+<h3>New Person As Per Example</h3>
+
+<EditForm Model=@currentPerson>
+    <p>
+        Demonstrates EditForm and model binding
+    </p>
+    <p>
+        based on https://learn.microsoft.com/en-gb/training/modules/blazor-improve-how-forms-work/4-take-advantage-power-blazor-forms
+    </p>
+    <p>
+        LastName: <InputText @bind-Value=currentPerson.LastName></InputText>
+    </p>
+    <p>
+        <h3>Role</h3>
+        <InputRadioGroup Name="role" @bind-Value=role>
+            @foreach (var ro in Enum.GetValues(typeof(DummyRoles)))
+            {
+                <label>
+                    @ro:
+                    <InputRadio Name="role" Value="@ro"></InputRadio>
+                </label>
+                <br />
+            }
+        </InputRadioGroup>
+    </p>
+</EditForm>
+
+@code {
+    private enum DummyRoles
+    {
+        Skipper = 1,
+        Navigator,
+        Crew
+    }
+
+    private PersonHacked[] people = { };
+    private PersonHacked currentPerson = new PersonHacked();
+    private DummyRoles role;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var res = await client.GetAllPeopleAsync();
+        if (!res.IsSuccess)
+        {
+            JS.InvokeVoidAsync("alert", "Failed to get people");
+            return;
+        }
+
+        System.Diagnostics.Debug.Assert(res.Item != null, "On success, an item must be present.");
+
+        people = res.Item.ToArray();
+
+        Logger.LogInformation($"{OnInitializedAsync} finished", nameof(OnInitializedAsync));
+    }
+
+}

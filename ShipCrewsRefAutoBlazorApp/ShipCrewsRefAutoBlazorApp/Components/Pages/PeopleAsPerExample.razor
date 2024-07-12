@@ -1,0 +1,80 @@
+﻿@page "/peopleasperexample"
+@using ShipCrewsRefAutoBlazorApp.Services
+@using Microsoft.AspNetCore.WebUtilities
+
+@inject IShipCrewsService client
+@inject ILogger<People> Logger
+@inject IJSRuntime JS
+
+@code { // Simon: without this, events do not fire
+}
+@rendermode InteractiveServer
+
+<h3>People As Per Example</h3>
+
+<input type="number" width="2" min="0" max="@upperIndex" @onchange="ChangePerson" value="@index" />
+
+<EditForm Model=@currentPerson>
+    <p>
+        Demonstrates EditForm and model binding
+    </p>
+    <p>
+        based on https://learn.microsoft.com/en-gb/training/modules/blazor-improve-how-forms-work/4-take-advantage-power-blazor-forms
+    </p>
+    <p>
+        PersonId: <InputNumber @bind-Value=currentPerson.PersonId></InputNumber>
+    </p>
+    <p>
+        LastName: <InputText @bind-Value=currentPerson.LastName></InputText>
+    </p>
+</EditForm>
+
+@code {
+    private PersonHacked[] people = { };
+    private PersonHacked currentPerson = new PersonHacked();
+    private int index = 0;
+    private int upperIndex = 0;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var res = await client.GetAllPeopleAsync();
+        if (!res.IsSuccess)
+        {
+            JS.InvokeVoidAsync("alert", "Failed to get people");
+            return;
+        }
+
+        System.Diagnostics.Debug.Assert(res.Item != null, "On success, an item must be present.");
+
+        people = res.Item.ToArray();
+        currentPerson = people[index];
+        upperIndex = people.Count() - 1;
+
+        Logger.LogInformation($"{OnInitializedAsync} index: {index}, upperIndex: {upperIndex}", nameof(OnInitializedAsync), index, upperIndex);
+    }
+
+    private async Task ChangePerson(ChangeEventArgs e)
+    {
+        if (e.Value == null)
+        {
+            index = 0;
+            currentPerson = null;
+            return;
+        }
+
+        var val = e.Value as string;
+        if (val == null)
+        {
+            index = 0;
+            currentPerson = null;
+            return;
+        }
+
+        index = int.Parse(val as string);
+        if (index <= upperIndex && index >= 0)
+        {
+            currentPerson = people[index];
+        }
+    }
+}
