@@ -79,6 +79,12 @@
         Logger.LogInformation($"{OnInitializedAsync} finished", nameof(OnInitializedAsync));
     }
 
+    private bool IsPersonNameUnique(string firstName, string lastName)
+    {
+        return !people.Any(p => p.LastName.Equals(lastName, StringComparison.CurrentCulture) &&
+            p.FirstName.Equals(firstName, StringComparison.CurrentCulture));
+    }
+
     private async Task CheckSubmission(EditContext editContext)
     {
         var isError = false;
@@ -98,6 +104,15 @@
             if (isError)
             {
                 JS.InvokeVoidAsync("alert", "Unacceptable value detected.");
+            }
+
+            if (!isError)
+            {
+                System.Diagnostics.Debug.Assert(model != null, "Logic above should have handled this.");
+                if (!IsPersonNameUnique(model.FirstName, model.LastName))
+                {
+                    JS.InvokeVoidAsync("alert", "Unacceptable duplicate user name.");
+                }
             }
 
             if (!isError)
