@@ -15,5 +15,6 @@
         Task<SimpleResponse> CreatePersonAsync(PersonHacked body);
         Task<SimpleResponse> UpdatePersonAsync(PersonHacked body);
         Task<SimpleResponse> DeletePersonAsync(PersonHacked body);
+        Task<ServiceResponse<PersonHacked>> AddPersonAsync(PersonHacked person);
     }
 }

@@ -4,6 +4,7 @@
 
 @inject IShipCrewsService client
 @inject ILogger<People> Logger
+@inject NavigationManager NavigationManager
 @inject IJSRuntime JS
 
 @code {
@@ -13,12 +14,15 @@
 
 <h3>New Person As Per Example</h3>
 
-<EditForm Model=@currentPerson>
+<EditForm Model=@currentPerson OnSubmit="CheckSubmission">
     <p>
         Demonstrates EditForm and model binding
     </p>
     <p>
         based on https://learn.microsoft.com/en-gb/training/modules/blazor-improve-how-forms-work/4-take-advantage-power-blazor-forms
+    </p>
+    <p>
+        FirstName: <InputText @bind-Value=currentPerson.FirstName></InputText>
     </p>
     <p>
         LastName: <InputText @bind-Value=currentPerson.LastName></InputText>
@@ -36,6 +40,10 @@
             }
         </InputRadioGroup>
     </p>
+    <p>
+        <button disabled=@isSubmitting>Add</button>
+        <button disabled=@isSubmitting>Any button triggers submit</button>
+    </p>
 </EditForm>
 
 @code {
@@ -49,6 +57,7 @@
     private PersonHacked[] people = { };
     private PersonHacked currentPerson = new PersonHacked();
     private DummyRoles role;
+    private bool isSubmitting = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -66,4 +75,49 @@
         Logger.LogInformation($"{OnInitializedAsync} finished", nameof(OnInitializedAsync));
     }
 
+    private async Task CheckSubmission(EditContext editContext)
+    {
+        var isError = false;
+        var newId = 0;
+        isSubmitting = true;
+        var model = editContext.Model as PersonHacked;
+        if (model == null)
+        {
+            JS.InvokeVoidAsync("alert", "Failed to detect a person.");
+        }
+        else
+        {
+            model.RoleId = (int)role;
+            isError = string.IsNullOrWhiteSpace(model?.FirstName)
+                || string.IsNullOrWhiteSpace(model?.LastName);
+            if (isError)
+            {
+                JS.InvokeVoidAsync("alert", "Unacceptable value detected.");
+            }
+
+            if (!isError)
+            {
+                System.Diagnostics.Debug.Assert(model != null, "Logic above should have handled this.");
+                var res = await client.AddPersonAsync(model);
+
+                // todo: need to return 200 or 201 with a location
+                /*
+                if (!res.IsSuccess)
+                {
+                    isError = true;
+                    JS.InvokeVoidAsync("alert", $"Add failed with {res.Error}.");
+                }
+                */
+
+                newId = res.Item.PersonId;
+            }
+
+            if (!isError)
+            {
+                var nav = $"{NavigationManager.BaseUri}People/{newId}";
+                NavigationManager.NavigateTo(nav);
+            }
+        }
+        isSubmitting = false;
+    }
 }

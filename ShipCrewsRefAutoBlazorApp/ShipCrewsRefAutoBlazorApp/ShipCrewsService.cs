@@ -34,6 +34,20 @@ namespace ShipCrewsRefAutoBlazorApp
             throw new NotImplementedException();
         }
 
+        public async Task<ServiceResponse<PersonHacked>> AddPersonAsync(PersonHacked person)
+        {
+            try
+            {
+                var res = await client.PeoplePOSTAsync(person);
+                return new ServiceResponse<PersonHacked>() { Item = res };
+            }
+            catch (Exception excep)
+            {
+                logger.LogError(excep, @"{AddPersonAsync}", nameof(AddPersonAsync));
+                return new ServiceResponse<PersonHacked>() { Error = excep.Message };
+            }
+        }
+
         public async Task<ServiceResponse<ICollection<PersonHacked>>> GetAllPeopleAsync()
         {
             try
