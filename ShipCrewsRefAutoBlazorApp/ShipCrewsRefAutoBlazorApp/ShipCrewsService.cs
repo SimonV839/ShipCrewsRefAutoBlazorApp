@@ -38,6 +38,7 @@ namespace ShipCrewsRefAutoBlazorApp
         {
             try
             {
+                await Task.Delay(1000);// test only
                 var res = await client.PeoplePOSTAsync(person);
                 return new ServiceResponse<PersonHacked>() { Item = res };
             }

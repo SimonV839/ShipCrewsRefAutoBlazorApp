@@ -16,7 +16,10 @@
 
 <EditForm Model=@currentPerson OnSubmit="CheckSubmission">
     <p>
-        Demonstrates EditForm and model binding
+        Demonstrates EditForm and model binding.
+    </p>
+    <p>
+        Creation returning the new id required the use of [ProducesResponseType(StatusCodes.Status201Created)] attibute by the referenced class.
     </p>
     <p>
         based on https://learn.microsoft.com/en-gb/training/modules/blazor-improve-how-forms-work/4-take-advantage-power-blazor-forms
@@ -50,8 +53,9 @@
     private enum DummyRoles
     {
         Skipper = 1,
+        RadarOperator,
         Navigator,
-        Crew
+        NotKnownToDb
     }
 
     private PersonHacked[] people = { };
@@ -89,7 +93,8 @@
         {
             model.RoleId = (int)role;
             isError = string.IsNullOrWhiteSpace(model?.FirstName)
-                || string.IsNullOrWhiteSpace(model?.LastName);
+                || string.IsNullOrWhiteSpace(model?.LastName)
+                || model.RoleId.Value == 0;
             if (isError)
             {
                 JS.InvokeVoidAsync("alert", "Unacceptable value detected.");
@@ -100,16 +105,17 @@
                 System.Diagnostics.Debug.Assert(model != null, "Logic above should have handled this.");
                 var res = await client.AddPersonAsync(model);
 
-                // todo: need to return 200 or 201 with a location
-                /*
-                if (!res.IsSuccess)
+                // Note 201 returned due to use of attibute: [ProducesResponseType(StatusCodes.Status201Created)]
+                if (res.IsSuccess)
+                {
+                    System.Diagnostics.Debug.Assert(res.Item != null, "Code above should have handled this.");
+                    newId = res.Item.PersonId;
+                }
+                else
                 {
                     isError = true;
                     JS.InvokeVoidAsync("alert", $"Add failed with {res.Error}.");
                 }
-                */
-
-                newId = res.Item.PersonId;
             }
 
             if (!isError)
