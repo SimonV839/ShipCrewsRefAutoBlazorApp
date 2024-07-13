@@ -10,6 +10,7 @@ namespace ShipCrewsRefAutoBlazorApp.Model
             set => servicePerson.PersonId = value;
         }
 
+        // Simon: the default ErrorMessage includes the name
         [Required, MinLength(2), MaxLength(50)]
         public string FirstName
         {
@@ -24,7 +25,8 @@ namespace ShipCrewsRefAutoBlazorApp.Model
             set => servicePerson.LastName = value;
         }
 
-        [Required, Range(1, 3, ErrorMessage = "Please enter a value between 1 and 3 inclusive.")]
+        //[Required, Range(1, 3, ErrorMessage = "Please enter a value between 1 and 3 inclusive.")]
+        [Required, Range(1, 3)]
         public int RoleId
 
         {
