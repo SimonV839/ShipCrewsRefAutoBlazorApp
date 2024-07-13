@@ -17,7 +17,8 @@
         Demonstrates EditForm using data annotations.
     </p>
     <p>
-        ValidationSummary shows any violations
+        ValidationSummary shows any violations in a summary (at end). 
+        ValidationMessage shows the message where included (under each input).
     </p>
     <p>
         DataAnnotationsValidator in EditForm performs the validation
@@ -27,22 +28,26 @@
     </p>
     <p>
         FirstName: <InputText @bind-Value=currentPerson.FirstName></InputText>
+        <ValidationMessage For="@(() => currentPerson.FirstName)" />
     </p>
     <p>
         LastName: <InputText @bind-Value=currentPerson.LastName></InputText>
+        <ValidationMessage For="@(() => currentPerson.LastName)" />
     </p>
     <p>
         <h3>Role</h3>
-        <InputRadioGroup Name="role" @bind-Value=role>
+        <InputRadioGroup Name="role" @bind-Value=currentPerson.RoleId>
             @foreach (var ro in Enum.GetValues(typeof(DummyRoles)))
             {
+                int val = (int)ro;
                 <label>
                     @ro:
-                    <InputRadio Name="role" Value="@ro"></InputRadio>
+                    <InputRadio Name="role" Value="@val"></InputRadio>
                 </label>
                 <br />
             }
         </InputRadioGroup>
+        <ValidationMessage For="@(() => currentPerson.RoleId)" />
     </p>
     <p>
         <button disabled=@isSubmitting>Add</button>
@@ -63,7 +68,6 @@
 
     private PersonHacked[] people = { };
     private PersonWrapper currentPerson = new PersonWrapper();
-    private DummyRoles role;
     private bool isSubmitting = false;
 
     protected override async Task OnInitializedAsync()
@@ -100,23 +104,11 @@
         }
         else
         {
-            model.RoleId = (int)role;
-            isError = string.IsNullOrWhiteSpace(model?.FirstName)
-                || string.IsNullOrWhiteSpace(model?.LastName)
-                || model.RoleId == 0;
-            if (isError)
+            System.Diagnostics.Debug.Assert(model != null, "Logic above should have handled this.");
+            if (!IsPersonNameUnique(model.FirstName, model.LastName))
             {
-                JS.InvokeVoidAsync("alert", "Unacceptable value detected.");
-            }
-
-            if (!isError)
-            {
-                System.Diagnostics.Debug.Assert(model != null, "Logic above should have handled this.");
-                if (!IsPersonNameUnique(model.FirstName, model.LastName))
-                {
-                    JS.InvokeVoidAsync("alert", "Unacceptable duplicate user name.");
-                    isError = true;
-                }
+                JS.InvokeVoidAsync("alert", "Unacceptable duplicate user name.");
+                isError = true;
             }
 
             if (!isError)

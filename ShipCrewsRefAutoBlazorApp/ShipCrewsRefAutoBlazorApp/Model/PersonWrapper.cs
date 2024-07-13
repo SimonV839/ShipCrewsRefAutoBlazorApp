@@ -18,7 +18,7 @@ namespace ShipCrewsRefAutoBlazorApp.Model
             set => servicePerson.FirstName = value;
         }
 
-        [Required, MinLength(2), MaxLength(50)]
+        [Required, MinLength(2, ErrorMessage="LastName must be 2 characters or more"), MaxLength(50)]
         public string LastName
         {
             get => servicePerson.LastName;
