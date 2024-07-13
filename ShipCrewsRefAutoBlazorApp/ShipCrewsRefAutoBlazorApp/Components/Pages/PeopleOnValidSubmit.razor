@@ -1,0 +1,155 @@
+﻿@page "/newpersononvalidsubmit"
+@using ShipCrewsRefAutoBlazorApp.Model
+@using ShipCrewsRefAutoBlazorApp.Services
+@using Microsoft.AspNetCore.WebUtilities
+
+@inject IShipCrewsService client
+@inject ILogger<People> Logger
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+
+@rendermode InteractiveServer
+
+<h3>New Person using OnValidSubmit and OnInvalidSubmit</h3>
+
+<EditForm Model=@currentPerson OnValidSubmit=@ProcessInputData OnInvalidSubmit=@ShowFeedback>
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <p>
+        Demonstrates EditForm using OnValidSubmit and OnInvalidSubmit.
+    </p>
+    <p>
+        ValidationSummary shows any violations in a summary (at end).
+        ValidationMessage shows the message where included (under each input).
+    </p>
+    <p>
+        DataAnnotationsValidator in EditForm performs the validation
+    </p>
+    <p>
+        based on https://learn.microsoft.com/en-gb/training/modules/blazor-improve-how-forms-work/7-exercise-add-server-client-side-data-validation-address-form
+    </p>
+    <p>
+        FirstName: <InputText @bind-Value=currentPerson.FirstName></InputText>
+        <ValidationMessage For="@(() => currentPerson.FirstName)" />
+    </p>
+    <p>
+        LastName: <InputText @bind-Value=currentPerson.LastName></InputText>
+        <ValidationMessage For="@(() => currentPerson.LastName)" />
+    </p>
+    <p>
+        <h3>Role</h3>
+        <InputRadioGroup Name="role" @bind-Value=currentPerson.RoleId>
+            @foreach (var ro in Enum.GetValues(typeof(DummyRoles)))
+            {
+                int val = (int)ro;
+                <label>
+                    @ro:
+                    <InputRadio Name="role" Value="@val"></InputRadio>
+                </label>
+                <br />
+            }
+        </InputRadioGroup>
+        <ValidationMessage For="@(() => currentPerson.RoleId)" />
+    </p>
+    <p>
+        <button disabled=@isSubmitting>Add</button>
+        <button disabled=@isSubmitting>Any button triggers submit</button>
+    </p>
+</EditForm>
+
+@code {
+    private enum DummyRoles
+    {
+        Skipper = 1,
+        RadarOperator,
+        Navigator,
+        NotKnownToDb
+    }
+
+    private PersonHacked[] people = { };
+    private PersonWrapper currentPerson = new PersonWrapper();
+    private bool isSubmitting = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var res = await client.GetAllPeopleAsync();
+        if (!res.IsSuccess)
+        {
+            JS.InvokeVoidAsync("alert", "Failed to get people");
+            return;
+        }
+
+        System.Diagnostics.Debug.Assert(res.Item != null, "On success, an item must be present.");
+
+        people = res.Item.ToArray();
+
+        Logger.LogInformation($"{OnInitializedAsync} finished", nameof(OnInitializedAsync));
+    }
+
+    private bool IsPersonNameUnique(string firstName, string lastName)
+    {
+        return !people.Any(p => p.LastName.Equals(lastName, StringComparison.CurrentCulture) &&
+            p.FirstName.Equals(firstName, StringComparison.CurrentCulture));
+    }
+
+    private async Task ProcessInputData(EditContext editContext)
+    {
+        isSubmitting = true;
+        var isError = false;
+        var newId = 0;
+        var model = editContext.Model as PersonWrapper;
+        if (model == null)
+        {
+            JS.InvokeVoidAsync("alert", "Failed to detect a person.");
+        }
+        else
+        {
+            if (!IsPersonNameUnique(model.FirstName, model.LastName))
+            {
+                JS.InvokeVoidAsync("alert", "Unacceptable duplicate user name.");
+                isError = true;
+            }
+            else
+            {
+                System.Diagnostics.Debug.Assert(model != null, "Logic above should have handled this.");
+                var res = await client.AddPersonAsync(model.PersonHacked);
+
+                // Note 201 returned due to use of attibute: [ProducesResponseType(StatusCodes.Status201Created)]
+                if (res.IsSuccess)
+                {
+                    System.Diagnostics.Debug.Assert(res.Item != null, "Code above should have handled this.");
+                    newId = res.Item.PersonId;
+                }
+                else
+                {
+                    isError = true;
+                    JS.InvokeVoidAsync("alert", $"Add failed with {res.Error}.");
+                }
+                if (!isError)
+                {
+                    var nav = $"{NavigationManager.BaseUri}People/{newId}";
+                    NavigationManager.NavigateTo(nav);
+                }
+            }
+        }
+        isSubmitting = false;
+    }
+
+    private void ShowFeedback(EditContext editContext)
+    {
+        var model = editContext.Model as PersonWrapper;
+        if (model == null)
+        {
+            JS.InvokeVoidAsync("alert", "Failed to detect a person.");
+        }
+        else
+        {
+            System.Diagnostics.Debug.Assert(model != null, "Logic above should have handled this.");
+            if (model.RoleId < 1 || model.RoleId > 3)
+            {
+                model.RoleId = 2;
+                JS.InvokeVoidAsync("alert", "Unacceptable role id has been changed to an acceptable value.");
+            }
+        }
+    }
+}
