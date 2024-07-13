@@ -1,4 +1,5 @@
-﻿@page "/newpersonasperexample"
+﻿@page "/newpersonvalidation"
+@using ShipCrewsRefAutoBlazorApp.Model
 @using ShipCrewsRefAutoBlazorApp.Services
 @using Microsoft.AspNetCore.WebUtilities
 
@@ -7,22 +8,16 @@
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JS
 
-@code {
-    // Simon: without this, events do not fire
-}
 @rendermode InteractiveServer
 
 <h3>New Person As Per Example</h3>
 
 <EditForm Model=@currentPerson OnSubmit="CheckSubmission">
     <p>
-        Demonstrates EditForm and model binding.
+        Demonstrates EditForm and model property validation.
     </p>
     <p>
-        Creation returning the new id required the use of [ProducesResponseType(StatusCodes.Status201Created)] attibute by the referenced class.
-    </p>
-    <p>
-        based on https://learn.microsoft.com/en-gb/training/modules/blazor-improve-how-forms-work/4-take-advantage-power-blazor-forms
+        based on https://learn.microsoft.com/en-gb/training/modules/blazor-improve-how-forms-work/7-exercise-add-server-client-side-data-validation-address-form
     </p>
     <p>
         FirstName: <InputText @bind-Value=currentPerson.FirstName></InputText>
@@ -59,7 +54,7 @@
     }
 
     private PersonHacked[] people = { };
-    private PersonHacked currentPerson = new PersonHacked();
+    private PersonWrapper currentPerson = new PersonWrapper();
     private DummyRoles role;
     private bool isSubmitting = false;
 
@@ -90,7 +85,7 @@
         var isError = false;
         var newId = 0;
         isSubmitting = true;
-        var model = editContext.Model as PersonHacked;
+        var model = editContext.Model as PersonWrapper;
         if (model == null)
         {
             JS.InvokeVoidAsync("alert", "Failed to detect a person.");
@@ -100,7 +95,7 @@
             model.RoleId = (int)role;
             isError = string.IsNullOrWhiteSpace(model?.FirstName)
                 || string.IsNullOrWhiteSpace(model?.LastName)
-                || model.RoleId.Value == 0;
+                || model.RoleId == 0;
             if (isError)
             {
                 JS.InvokeVoidAsync("alert", "Unacceptable value detected.");
@@ -119,7 +114,7 @@
             if (!isError)
             {
                 System.Diagnostics.Debug.Assert(model != null, "Logic above should have handled this.");
-                var res = await client.AddPersonAsync(model);
+                var res = await client.AddPersonAsync(model.PersonHacked);
 
                 // Note 201 returned due to use of attibute: [ProducesResponseType(StatusCodes.Status201Created)]
                 if (res.IsSuccess)
