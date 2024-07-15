@@ -1,0 +1,193 @@
+﻿@page "/updateperson"
+@using ShipCrewsRefAutoBlazorApp.Model
+@using ShipCrewsRefAutoBlazorApp.Services
+@using Microsoft.AspNetCore.WebUtilities
+
+@inject IShipCrewsService client
+@inject ILogger<People> Logger
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+
+@rendermode InteractiveServer
+
+<h3>Update and monitor person</h3>
+
+<input type="number" width="2" min="0" max="@upperIndex" @onchange="ChangePerson" value="@index">Person selector</input>
+
+<EditForm Model=@currentPerson OnValidSubmit=OnSubmit>
+    <p>
+        Updates and deletes people for use with JS example.
+    </p>
+    <p>
+        used to show java script and monitoring
+    </p>
+    <p>
+        This should not use OnValidSubmit as people entered elsewhere cannot be deleted if they do not meet the local rules (eg names must be 3 or more characters)
+    </p>
+    <p>
+        ID: <InputNumber @bind-Value=currentPerson.PersonId readonly="readonly"></InputNumber>
+    </p>
+    <p>
+        FirstName: <InputText @bind-Value=currentPerson.FirstName></InputText>
+        <ValidationMessage For="@(() => currentPerson.FirstName)" />
+    </p>
+    <p>
+        LastName: <InputText @bind-Value=currentPerson.LastName></InputText>
+        <ValidationMessage For="@(() => currentPerson.LastName)" />
+    </p>
+    <p>
+        <h3>Role</h3>
+        <InputRadioGroup Name="role" @bind-Value=currentPerson.RoleId>
+            @foreach (var ro in Enum.GetValues(typeof(DummyRoles)))
+            {
+                int val = (int)ro;
+                <label>
+                    @ro:
+                    <InputRadio Name="role" Value="@val"></InputRadio>
+                </label>
+                <br />
+            }
+        </InputRadioGroup>
+        <ValidationMessage For="@(() => currentPerson.RoleId)" />
+    </p>
+    <p>
+        <button type="submit" disabled=@isSubmitting 
+            @onclick='() => SetButtonPressed("Update")'>
+            Update
+        </button>
+        <button type="submit" disabled=@isSubmitting 
+            @onclick='() => SetButtonPressed("Delete")'>
+            Delete
+        </button>
+    </p>
+    <ValidationSummary />
+    <DataAnnotationsValidator />
+</EditForm>
+
+@code {
+    private enum DummyRoles
+    {
+        Skipper = 1,
+        RadarOperator,
+        Navigator,
+        NotKnownToDb
+    }
+
+    private PersonHacked[] people = { };
+    private PersonWrapper currentPerson = new PersonWrapper();
+    private int index = 0;
+    private int upperIndex = 0;
+    private bool isSubmitting = false;
+    private string buttonPressed = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var res = await client.GetAllPeopleAsync();
+        if (!res.IsSuccess)
+        {
+            JS.InvokeVoidAsync("alert", "Failed to get people");
+            return;
+        }
+
+        System.Diagnostics.Debug.Assert(res.Item != null, "On success, an item must be present.");
+
+        people = res.Item.ToArray();
+        currentPerson = new PersonWrapper() { PersonHacked = people[index] };
+        upperIndex = people.Count() - 1;
+
+        Logger.LogInformation($"{OnInitializedAsync} finished", nameof(OnInitializedAsync));
+    }
+
+    private void SetButtonPressed(string buttonName) => buttonPressed = buttonName;
+
+    private async Task ChangePerson(ChangeEventArgs e)
+    {
+        if (e.Value == null)
+        {
+            index = 0;
+            currentPerson = new PersonWrapper();
+            return;
+        }
+
+        var val = e.Value as string;
+        if (val == null)
+        {
+            index = 0;
+            currentPerson = new PersonWrapper();
+            return;
+        }
+
+        index = int.Parse(val as string);
+        if (index <= upperIndex && index >= 0)
+        {
+            currentPerson = new PersonWrapper() { PersonHacked = people[index] };
+        }
+    }
+
+    private bool IsPersonNameUnique(string firstName, string lastName)
+    {
+        var peps = people.Where(p => p.PersonId != currentPerson.PersonId);
+        return !peps.Any(p => p.LastName.Equals(lastName, StringComparison.CurrentCulture) &&
+            p.FirstName.Equals(firstName, StringComparison.CurrentCulture));
+    }
+
+    private async Task OnSubmit(EditContext editContext)
+    {
+        var isError = false;
+        isSubmitting = true;
+        var model = editContext.Model as PersonWrapper;
+        if (model == null)
+        {
+            JS.InvokeVoidAsync("alert", "Failed to detect a person.");
+        }
+        else
+        {
+            if (buttonPressed == "Delete")
+            {
+                System.Diagnostics.Debug.Assert(model != null, "Logic above should have handled this.");
+                var res = await client.DeletePersonAsync(model.PersonHacked);
+
+                if (res.IsSuccess)
+                {
+                    var nav = $"{NavigationManager.Uri}";
+                    NavigationManager.NavigateTo(nav, true);
+                }
+                else
+                {
+                    isError = true;
+                    JS.InvokeVoidAsync("alert", $"Delete failed with {res.Error}.");
+                }
+            }
+            else if (buttonPressed == "Update")
+            {
+
+                System.Diagnostics.Debug.Assert(model != null, "Logic above should have handled this.");
+                if (!IsPersonNameUnique(model.FirstName, model.LastName))
+                {
+                    JS.InvokeVoidAsync("alert", "Unacceptable duplicate user name.");
+                    isError = true;
+                }
+
+                if (!isError)
+                {
+                    System.Diagnostics.Debug.Assert(model != null, "Logic above should have handled this.");
+                    var res = await client.UpdatePersonAsync(model.PersonHacked);
+
+                    // Note 201 returned due to use of attibute: [ProducesResponseType(StatusCodes.Status201Created)]
+                    if (!res.IsSuccess)
+                    {
+                        isError = true;
+                        JS.InvokeVoidAsync("alert", $"Update failed with {res.Error}.");
+                    }
+                }
+            }
+
+            if (isError)
+            {
+                var nav = $"{NavigationManager.Uri}";
+                NavigationManager.NavigateTo(nav, true);
+            }
+        }
+        isSubmitting = false;
+    }
+}

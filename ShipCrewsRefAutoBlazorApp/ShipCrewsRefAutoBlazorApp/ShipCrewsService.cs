@@ -29,9 +29,18 @@ namespace ShipCrewsRefAutoBlazorApp
             }
         }
 
-        public Task<SimpleResponse> DeletePersonAsync(PersonHacked body)
+        public async Task<SimpleResponse> DeletePersonAsync(PersonHacked body)
         {
-            throw new NotImplementedException();
+            try
+            {
+                await client.PeopleDELETEAsync(body.PersonId);
+                return new SimpleResponse();
+            }
+            catch (Exception excep)
+            {
+                logger.LogError(excep, @"{GetAllPeopleAsync}", nameof(GetAllPeopleAsync));
+                return new SimpleResponse() { Error = excep.Message };
+            }
         }
 
         public async Task<ServiceResponse<PersonHacked>> AddPersonAsync(PersonHacked person)
@@ -95,9 +104,18 @@ namespace ShipCrewsRefAutoBlazorApp
             }
         }
 
-        public Task<SimpleResponse> UpdatePersonAsync(PersonHacked body)
+        public async Task<SimpleResponse> UpdatePersonAsync(PersonHacked body)
         {
-            throw new NotImplementedException();
+            try
+            {
+                await client.PeoplePUTAsync(body.PersonId, body);
+                return new SimpleResponse();
+            }
+            catch (Exception excep)
+            {
+                logger.LogError(excep, @"{UpdatePersonAsync}", nameof(UpdatePersonAsync));
+                return new SimpleResponse() { Error = excep.Message };
+            }
         }
     }
 }
