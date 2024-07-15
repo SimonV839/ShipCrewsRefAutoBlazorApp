@@ -12,7 +12,7 @@
 
 <h3>Update and monitor person</h3>
 
-<input type="number" width="2" min="0" max="@upperIndex" @onchange="ChangePerson" value="@index">Person selector</input>
+Person Selector: <input type="number" width="2" min="0" max="@upperIndex" @onchange="ChangePerson" value="@index"></input>
 
 <EditForm Model=@currentPerson OnValidSubmit=OnSubmit>
     <p>
@@ -183,6 +183,43 @@
         }
         isSubmitting = false;
     }
+
+    /* using 3rd party JS lib but looks bad
+    async Task RemovePersonConfirmation(PersonHacked removePerson)
+    {
+        var messageParams = new
+        {
+            title = "Remove Person?",
+            text = $"""Do you want to remove "{removePerson.FirstName} {removePerson.LastName}" ?""",
+            icon = "warning",
+            buttons = new
+            {
+                abort = new { text = "No, leave them", value = false },
+                confirm = new { text = "Yes, remove the person", value = true }
+            },
+            dangerMode = true
+        };
+
+        SimpleResponse? res = null;
+        if (await JS.InvokeAsync<bool>("swal", messageParams))
+        {
+            res = await client.DeletePersonAsync(removePerson);
+        }
+
+        if (res != null)
+        {
+            if (res.IsSuccess)
+            {
+                var nav = $"{NavigationManager.Uri}";
+                NavigationManager.NavigateTo(nav, true);
+            }
+            else
+            {
+                JS.InvokeVoidAsync("alert", $"Delete failed with {res.Error}.");
+            }
+        }
+    }
+    */
 
     async Task RemovePersonConfirmation(PersonHacked removePerson)
     {
