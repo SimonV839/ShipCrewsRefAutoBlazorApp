@@ -19,6 +19,9 @@
         Updates and deletes people for use with JS example.
     </p>
     <p>
+        base on https://learn.microsoft.com/en-gb/training/modules/blazor-build-rich-interactive-components/3-exercise-use-javascript-libraries-blazor-apps
+    </p>
+    <p>
         used to show java script and monitoring
     </p>
     <p>
@@ -145,18 +148,8 @@
             if (buttonPressed == "Delete")
             {
                 System.Diagnostics.Debug.Assert(model != null, "Logic above should have handled this.");
-                var res = await client.DeletePersonAsync(model.PersonHacked);
 
-                if (res.IsSuccess)
-                {
-                    var nav = $"{NavigationManager.Uri}";
-                    NavigationManager.NavigateTo(nav, true);
-                }
-                else
-                {
-                    isError = true;
-                    JS.InvokeVoidAsync("alert", $"Delete failed with {res.Error}.");
-                }
+                await RemovePersonConfirmation(model.PersonHacked);
             }
             else if (buttonPressed == "Update")
             {
@@ -189,5 +182,25 @@
             }
         }
         isSubmitting = false;
+    }
+
+    async Task RemovePersonConfirmation(PersonHacked removePerson)
+    {
+        if (await JS.InvokeAsync<bool>(
+            "confirm",
+            $"""Do you want to remove "{removePerson.FirstName} {removePerson.LastName}" ?"""))
+        {
+            var res = await client.DeletePersonAsync(removePerson);
+
+            if (res.IsSuccess)
+            {
+                var nav = $"{NavigationManager.Uri}";
+                NavigationManager.NavigateTo(nav, true);
+            }
+            else
+            {
+                JS.InvokeVoidAsync("alert", $"Delete failed with {res.Error}.");
+            }
+        }
     }
 }
