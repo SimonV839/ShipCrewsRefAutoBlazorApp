@@ -10,9 +10,12 @@
 
 @rendermode InteractiveServer
 
+@implements IDisposable
+
 <h3>Update and monitor person</h3>
 
-Person Selector: <input type="number" width="2" min="0" max="@upperIndex" @onchange="ChangePerson" value="@index"></input>
+Person Selector:
+<input type="number" width="2" min="0" max="@upperIndex" @onchange="ChangePersonAsync" value="@index"></input>
 
 <EditForm Model=@currentPerson OnValidSubmit=OnSubmit>
     <p>
@@ -29,6 +32,32 @@ Person Selector: <input type="number" width="2" min="0" max="@upperIndex" @oncha
     </p>
     <p>
         ID: <InputNumber @bind-Value=currentPerson.PersonId readonly="readonly"></InputNumber>
+    </p>
+    <p>
+        @if (people.Any())
+        {
+            var isNameUnique = isNameUniqueOnServer;
+
+            @if(isNameUnique == null)
+            {
+                <div class="spinner-grow text-danger float-right" role="status">
+                </div>
+            }
+            else{
+                @if (isNameUnique.Value)
+                {
+                    <div>
+                        Name is unique on server
+                    </div>
+                }
+                else
+                {
+                    <div>
+                        Name is not unique on server
+                    </div>
+                }
+            }
+        }
     </p>
     <p>
         FirstName: <InputText @bind-Value=currentPerson.FirstName></InputText>
@@ -82,6 +111,8 @@ Person Selector: <input type="number" width="2" min="0" max="@upperIndex" @oncha
     private int upperIndex = 0;
     private bool isSubmitting = false;
     private string buttonPressed = string.Empty;
+    private PeriodicTimer timer = new(TimeSpan.FromSeconds(3));
+    private bool? isNameUniqueOnServer = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -101,9 +132,12 @@ Person Selector: <input type="number" width="2" min="0" max="@upperIndex" @oncha
         Logger.LogInformation($"{OnInitializedAsync} finished", nameof(OnInitializedAsync));
     }
 
+    protected override Task OnAfterRenderAsync(bool firstRender) =>
+        firstRender ? StartPollingTimerAsync() : Task.CompletedTask;
+
     private void SetButtonPressed(string buttonName) => buttonPressed = buttonName;
 
-    private async Task ChangePerson(ChangeEventArgs e)
+    private async void ChangePersonAsync(ChangeEventArgs e)
     {
         if (e.Value == null)
         {
@@ -123,15 +157,21 @@ Person Selector: <input type="number" width="2" min="0" max="@upperIndex" @oncha
         index = int.Parse(val as string);
         if (index <= upperIndex && index >= 0)
         {
+            timer.Dispose();
+
             currentPerson = new PersonWrapper() { PersonHacked = people[index] };
+
+            await UpdateNameUniqueOnServerAsync();
+            await StartPollingTimerAsync();
         }
     }
 
-    private bool IsPersonNameUnique(string firstName, string lastName)
+    private bool IsPersonNameUnique(string firstName, string lastName, PersonHacked[] peeps)
     {
-        var peps = people.Where(p => p.PersonId != currentPerson.PersonId);
-        return !peps.Any(p => p.LastName.Equals(lastName, StringComparison.CurrentCulture) &&
-            p.FirstName.Equals(firstName, StringComparison.CurrentCulture));
+        var peps = peeps.Where(p => p.PersonId != currentPerson.PersonId);
+        return !peps.Any(p => 
+            string.Equals(lastName, p.LastName, StringComparison.CurrentCulture) &&
+            string.Equals(firstName, p.FirstName, StringComparison.CurrentCulture) );
     }
 
     private async Task OnSubmit(EditContext editContext)
@@ -155,7 +195,7 @@ Person Selector: <input type="number" width="2" min="0" max="@upperIndex" @oncha
             {
 
                 System.Diagnostics.Debug.Assert(model != null, "Logic above should have handled this.");
-                if (!IsPersonNameUnique(model.FirstName, model.LastName))
+                if (!IsPersonNameUnique(model.FirstName, model.LastName, people))
                 {
                     JS.InvokeVoidAsync("alert", "Unacceptable duplicate user name.");
                     isError = true;
@@ -186,38 +226,38 @@ Person Selector: <input type="number" width="2" min="0" max="@upperIndex" @oncha
 
     /* using 3rd party JS lib but looks bad
     async Task RemovePersonConfirmation(PersonHacked removePerson)
-    {
+        {
         var messageParams = new
         {
-            title = "Remove Person?",
-            text = $"""Do you want to remove "{removePerson.FirstName} {removePerson.LastName}" ?""",
-            icon = "warning",
-            buttons = new
-            {
-                abort = new { text = "No, leave them", value = false },
-                confirm = new { text = "Yes, remove the person", value = true }
-            },
-            dangerMode = true
-        };
+        title = "Remove Person?",
+        text = $"""Do you want to remove "{removePerson.FirstName} {removePerson.LastName}" ?""",
+    icon = "warning",
+    buttons = new
+    {
+    abort = new { text = "No, leave them", value = false },
+    confirm = new { text = "Yes, remove the person", value = true }
+    },
+    dangerMode = true
+    };
 
-        SimpleResponse? res = null;
+    SimpleResponse? res = null;
         if (await JS.InvokeAsync<bool>("swal", messageParams))
-        {
+            {
             res = await client.DeletePersonAsync(removePerson);
         }
 
         if (res != null)
         {
-            if (res.IsSuccess)
-            {
-                var nav = $"{NavigationManager.Uri}";
-                NavigationManager.NavigateTo(nav, true);
-            }
-            else
-            {
-                JS.InvokeVoidAsync("alert", $"Delete failed with {res.Error}.");
-            }
+        if (res.IsSuccess)
+        {
+        var nav = $"{NavigationManager.Uri}";
+        NavigationManager.NavigateTo(nav, true);
         }
+        else
+        {
+        JS.InvokeVoidAsync("alert", $"Delete failed with {res.Error}.");
+    }
+    }
     }
     */
 
@@ -240,4 +280,37 @@ Person Selector: <input type="number" width="2" min="0" max="@upperIndex" @oncha
             }
         }
     }
+
+    async Task UpdateNameUniqueOnServerAsync()
+    {
+        isNameUniqueOnServer = null;
+        StateHasChanged();
+
+        var res = await client.GetAllPeopleAsync();
+        await Task.Delay(1000);
+        if (!res.IsSuccess)
+        {
+            JS.InvokeVoidAsync("alert", "Failed to get lastest list of peeps");
+            return;
+        }
+
+        System.Diagnostics.Debug.Assert(res.Item != null, "Previous code should have detected this.");
+        var peeps = res.Item.ToArray();
+
+        isNameUniqueOnServer = IsPersonNameUnique(currentPerson.FirstName, currentPerson.LastName, peeps);
+        StateHasChanged();
+    }
+
+    async Task StartPollingTimerAsync()
+    {
+        timer.Dispose();
+        timer = new(TimeSpan.FromSeconds(3));
+
+        while (currentPerson != null && await timer.WaitForNextTickAsync())
+        {
+            await UpdateNameUniqueOnServerAsync();
+        }
+    }
+
+    public void Dispose() => timer.Dispose();
 }
