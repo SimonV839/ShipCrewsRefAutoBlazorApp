@@ -1,0 +1,99 @@
+﻿@page "/peopletemplate"
+@using ShipCrewsRefAutoBlazorApp.Services
+@using ShipCrewsRefAutoBlazorApp.Components.TemplatedComps
+@inject IShipCrewsService client
+@inject ILogger<People> Logger
+
+@rendermode InteractiveServer
+
+<PageTitle>People Using Template</PageTitle>
+
+<h1>People</h1>
+<p>
+    This component template components
+    <ul>
+        <li>based on https://learn.microsoft.com/en-gb/training/modules/blazor-build-rich-interactive-components/7-exercise-reuse-components-creating-templates</li>
+    </ul>
+</p>
+@if (people == null)
+{
+    <p><em>@message</em></p>
+}
+else
+{
+           <PaginationComponent TItem="PersonHacked"
+                Items="people.OrderBy(p => p.PersonId).ToList()"
+                ItemLabel='item => new ($"{item.PersonId}")'>
+               <ItemContent>
+            <div class="list-group-item bg-secondary text-white">
+                <div class="col">
+                    <h5>ID: @($"{context.PersonId}")</h5>
+                </div>
+                <div class="col">
+                    First name:
+                    <span @attributes="@ColourFunction(context)">
+                        <strong>@context.FirstName</strong>
+                    </span>
+                </div>
+                <div class="col">
+                    Last name:
+                    <span @attributes="@ColourFunction(context)">
+                        <strong>@context.LastName</strong>
+                    </span>
+                </div>
+                <div class="col">
+                    Role ID: <strong>@context.RoleId</strong>
+                </div>
+                <div class="col">
+                    Is name unique: @(!IsPersonNameDuplicate(context))
+                </div>
+            </div>
+        </ItemContent>
+           </PaginationComponent>}
+
+@code {
+    private ICollection<PersonHacked>? people;
+    private string message = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Logger.LogInformation(@"{OnInitializedAsync} started. ", nameof(OnInitializedAsync));
+
+        people = null;  //  note: this does not help the failed refresh issue when filtering
+        message = "Loading ...";
+
+        var result = await client.GetAllPeopleAsync();
+        if (result.IsSuccess)
+        {
+            System.Diagnostics.Debug.Assert(result.Item != null, "On success a value must have been set");
+            people = result.Item;
+
+            message = string.Empty;
+        }
+        else
+        {
+            message = result.Error ?? "No specific error text!";
+        }
+
+        Logger.LogInformation(@"{OnInitializedAsync} finished. Nr people:{nr}, message:'{mesage}'", nameof(OnInitializedAsync), people?.Count, message);
+    }
+
+    private Dictionary<string, object> ColourFunction(PersonHacked person)
+    {
+        var dict = new Dictionary<string, object>();
+        if (IsPersonNameDuplicate(person)) { dict.Add("style", "color: lightPink" ); }
+
+        return dict;
+    }
+
+    private bool IsPersonNameDuplicate(PersonHacked person)
+    {
+        if (people == null || person == null) { return true; }
+
+        return people.Any(p => 
+            p.PersonId != person.PersonId &&
+            string.Equals(p.LastName, person.LastName, StringComparison.CurrentCulture) &&
+            string.Equals(p.FirstName, person.FirstName, StringComparison.CurrentCulture));
+    }
+
+}
