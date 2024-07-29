@@ -3,6 +3,7 @@ using Serilog;
 using ShipCrewsRefAutoBlazorApp;
 using ShipCrewsRefAutoBlazorApp.Client.Pages;
 using ShipCrewsRefAutoBlazorApp.Components;
+using ShipCrewsRefAutoBlazorApp.Model;
 using ShipCrewsRefAutoBlazorApp.Services;
 
 Log.Logger = new LoggerConfiguration()
@@ -25,6 +26,8 @@ builder.Services.AddRazorComponents()
 // Simon: client injected into ship crews client
 builder.Services.AddSingleton(new HttpClient());
 builder.Services.AddSingleton<IShipCrewsService, ShipCrewsService>();
+
+builder.Services.AddScoped<LastAddedPerson>();
 
 var app = builder.Build();
 

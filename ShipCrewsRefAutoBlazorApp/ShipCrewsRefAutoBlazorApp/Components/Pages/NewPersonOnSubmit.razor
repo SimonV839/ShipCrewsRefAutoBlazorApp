@@ -1,4 +1,5 @@
 ﻿@page "/newpersononsubmit"
+@using ShipCrewsRefAutoBlazorApp.Model
 @using ShipCrewsRefAutoBlazorApp.Services
 @using Microsoft.AspNetCore.WebUtilities
 
@@ -6,6 +7,7 @@
 @inject ILogger<People> Logger
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JS
+@inject LastAddedPerson LastAddedPerson
 
 @code {
     // Simon: without this, events do not fire
@@ -20,6 +22,9 @@
     </p>
     <p>
         Creation returning the new id required the use of [ProducesResponseType(StatusCodes.Status201Created)] attibute by the referenced class.
+    </p>
+    <p>
+        The People templated page will select the last created person by default.
     </p>
     <p>
         based on https://learn.microsoft.com/en-gb/training/modules/blazor-improve-how-forms-work/4-take-advantage-power-blazor-forms
@@ -136,6 +141,10 @@
 
             if (!isError)
             {
+                //  this is used just to show the transfer of state. below a parameter is used
+                //  this is used on the person pagination page
+                LastAddedPerson.IdOfLastPersonAdded = newId;
+
                 var nav = $"{NavigationManager.BaseUri}People/{newId}";
                 NavigationManager.NavigateTo(nav);
             }

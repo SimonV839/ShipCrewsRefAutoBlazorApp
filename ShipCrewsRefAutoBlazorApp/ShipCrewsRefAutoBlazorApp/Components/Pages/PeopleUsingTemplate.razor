@@ -1,8 +1,10 @@
 ﻿@page "/peopletemplate"
-@using ShipCrewsRefAutoBlazorApp.Services
 @using ShipCrewsRefAutoBlazorApp.Components.TemplatedComps
+@using ShipCrewsRefAutoBlazorApp.Model
+@using ShipCrewsRefAutoBlazorApp.Services
 @inject IShipCrewsService client
 @inject ILogger<People> Logger
+@inject LastAddedPerson LastAddedPerson
 
 @rendermode InteractiveServer
 
@@ -23,7 +25,8 @@ else
 {
            <PaginationComponent TItem="PersonHacked"
                 Items="people.OrderBy(p => p.PersonId).ToList()"
-                ItemLabel='item => new ($"{item.PersonId}")'>
+                ItemLabel='item => new ($"{item.PersonId}")'
+                SelectedIndex="@GetIndexOfLastCreated()">
                <ItemContent>
             <div class="list-group-item bg-secondary text-white">
                 <div class="col">
@@ -54,6 +57,20 @@ else
 @code {
     private ICollection<PersonHacked>? people;
     private string message = string.Empty;
+
+    private int GetIndexOfLastCreated()
+    {
+        if (LastAddedPerson.IdOfLastPersonAdded.HasValue)
+        {
+            var index = people.OrderBy(p => p.PersonId).ToList().FindIndex(val => val.PersonId == LastAddedPerson.IdOfLastPersonAdded.Value);
+            if (index != -1)
+            {
+                return index;
+            }
+        }
+
+        return 0;
+    }
 
     protected override async Task OnInitializedAsync()
     {
