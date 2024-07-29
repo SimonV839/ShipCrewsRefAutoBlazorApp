@@ -2,11 +2,14 @@
 @using ShipCrewsRefAutoBlazorApp.Components.TemplatedComps
 @using ShipCrewsRefAutoBlazorApp.Model
 @using ShipCrewsRefAutoBlazorApp.Services
+@using ShipCrewsRefAutoBlazorApp.Shared
 @inject IShipCrewsService client
 @inject ILogger<People> Logger
 @inject LastAddedPerson LastAddedPerson
 
 @rendermode InteractiveServer
+
+@layout StandardLayout
 
 <PageTitle>People Using Template</PageTitle>
 
@@ -15,6 +18,8 @@
     This component template components
     <ul>
         <li>based on https://learn.microsoft.com/en-gb/training/modules/blazor-build-rich-interactive-components/7-exercise-reuse-components-creating-templates</li>
+        <li>uses a layout (StandardLayout.razor) which overrides the default (MainLayout.razor - specified in Routes.razor)</li>
+        <li>uses app state to select the last person created on the on summit page</li>
     </ul>
 </p>
 @if (people == null)
