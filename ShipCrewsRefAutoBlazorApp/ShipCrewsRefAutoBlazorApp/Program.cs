@@ -1,4 +1,4 @@
-using LoggingHelpers;
+using SimonV839.LoggingHelpers;
 using Serilog;
 using ShipCrewsRefAutoBlazorApp;
 using ShipCrewsRefAutoBlazorApp.Client.Pages;

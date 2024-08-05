@@ -1,4 +1,4 @@
-using LoggingHelpers;
+using SimonV839.LoggingHelpers;
 using Serilog;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 

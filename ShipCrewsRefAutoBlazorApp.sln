@@ -8,6 +8,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShipCrewsRefAutoBlazorApp.Client", "ShipCrewsRefAutoBlazorApp\ShipCrewsRefAutoBlazorApp.Client\ShipCrewsRefAutoBlazorApp.Client.csproj", "{F18CF5FB-D71D-4D92-B168-0F8C2BE19346}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7C008990-11EC-4FA5-96DB-E67A49C4E540}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestProject", "TestProject\TestProject.csproj", "{7578D82F-EC6E-42A2-A1A2-67EB198655C5}"
 EndProject

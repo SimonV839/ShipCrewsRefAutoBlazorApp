@@ -67,6 +67,7 @@ else
     {
         if (LastAddedPerson.IdOfLastPersonAdded.HasValue)
         {
+            System.Diagnostics.Debug.Assert(people != null, "this shuld not be the case when id is known");
             var index = people.OrderBy(p => p.PersonId).ToList().FindIndex(val => val.PersonId == LastAddedPerson.IdOfLastPersonAdded.Value);
             if (index != -1)
             {
